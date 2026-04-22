@@ -161,6 +161,8 @@ function Swap() {
 
                 const amount_in = utils.parseUnits(amountIn.toString(), fromTokenDecimals)
 
+                logSwapToBackend("attempted")
+
                 const approve_tx = await erc20Contract.approve(bestExchange["address"], amount_in)
 
                 await approve_tx.wait()
@@ -180,10 +182,13 @@ function Swap() {
                         );
                         await swap_tx.wait()
 
+                        logSwapToBackend("completed", swap_tx.hash)
+
                         setIsSwapping(false)
                         setAmountIn(null)
                         setAmountIn(null)
                     } catch (err) {
+                        logSwapToBackend("failed", null, err.message)
                         setIsSwapping(false)
                         window.alert("An error has occured")
                     }
@@ -203,15 +208,19 @@ function Swap() {
                         const swap_tx = await router.exactInputSingle(params);
                         await swap_tx.wait()
 
+                        logSwapToBackend("completed", swap_tx.hash)
+
                         setIsSwapping(false)
                         setAmountIn(null)
                         setAmountIn(null)
                     } catch (err) {
+                        logSwapToBackend("failed", null, err.message)
                         setIsSwapping(false)
                         window.alert("An error has occured")
                     }
                 }
             } catch (err) {
+                logSwapToBackend("failed", null, err.message)
                 setIsSwapping(false)
                 window.alert("An error has occured")
             }
@@ -270,6 +279,33 @@ function Swap() {
     // Change 2: use token decimals instead of assuming 18
     const fromTokenDecimals = fromTokenData ? fromTokenData.decimals : 18
     const toTokenDecimals = toTokenData ? toTokenData.decimals : 18
+
+    // Change 4: log swap updates to backend
+    async function logSwapToBackend(status, txHash = null, errorMessage = null) {
+        try {
+            await fetch("http://localhost:5001/api/transaction-log", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    network: currentNet,
+                    walletAddress: data.account,
+                    fromToken: fromTokenData ? fromTokenData.name : null,
+                    toToken: toTokenData ? toTokenData.name : null,
+                    amountIn,
+                    amountOutEstimated: amountOut,
+                    exchange: bestExchange ? bestExchange.name : null,
+                    txHash,
+                    status,
+                    timestamp: new Date().toISOString(),
+                    errorMessage,
+                }),
+            })
+        } catch (err) {
+            console.log("Could not save swap log")
+        }
+    }
 
     useEffect(() => {
         if (window.ethereum != undefined && data.network !== "") {
