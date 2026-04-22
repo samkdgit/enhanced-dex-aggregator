@@ -1,0 +1,11 @@
+Backend run steps
+
+1. Install backend dependencies:
+   cd backend
+   npm install
+
+2. Start the backend:
+   npm start
+
+3. The backend runs on:
+   http://localhost:5001
