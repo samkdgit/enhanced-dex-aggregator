@@ -10,18 +10,26 @@ function Exchanges(props) {
     const [amounts, setAmounts] = useState([])
 
     const currentNet = data.network !== "" ? data.network : "Ethereum Mainnet"
+    // Change 2: use token decimals instead of assuming 18
+    const currentTokens = tokens[currentNet] || []
+    const fromTokenData = currentTokens[props.token0]
+    const toTokenData = currentTokens[props.token1]
+    const fromTokenDecimals = fromTokenData ? fromTokenData.decimals : 18
+    const toTokenDecimals = toTokenData ? toTokenData.decimals : 18
 
     async function getPrices() {
         if (window.ethereum !== undefined) {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
 
-            const _tokenIn = tokens[currentNet][props.token0]["address"]
-            const _tokenOut = tokens[currentNet][props.token1]["address"]
+            const _tokenIn = fromTokenData ? fromTokenData.address : null
+            const _tokenOut = toTokenData ? toTokenData.address : null
+            if (!_tokenIn || !_tokenOut) {
+                setAmounts([])
+                return
+            }
             let path = [_tokenIn, _tokenOut]
 
-            const decimals = tokens[currentNet][props.token1]["decimals"]
-
-            let amountIn = utils.parseEther("1", "ether")
+            let amountIn = utils.parseUnits("1", fromTokenDecimals)
 
             const items = await Promise.all(
                 exchanges[currentNet].map(async (e) => {
@@ -32,7 +40,7 @@ function Exchanges(props) {
 
                             let item = {
                                 exchange: e.name,
-                                price: amount[1] / 10 ** decimals
+                                price: Number(utils.formatUnits(amount[1], toTokenDecimals))
                             }
                             return item
                         } catch (err) {
@@ -55,7 +63,7 @@ function Exchanges(props) {
 
                             let item = {
                                 exchange: e.name,
-                                price: amount / 10 ** decimals
+                                price: Number(utils.formatUnits(amount, toTokenDecimals))
                             }
                             return item
                         } catch (err) {

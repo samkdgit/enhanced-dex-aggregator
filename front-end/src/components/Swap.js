@@ -41,19 +41,28 @@ function Swap() {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             setAmountIn(Number(_amountIn))
             if (Number(_amountIn) !== 0) {
-                const decimals = tokens[currentNet][trade.toToken]["decimals"]
-                const _tokenIn = tokens[currentNet][trade.fromToken]["address"]
-                const _tokenOut = tokens[currentNet][trade.toToken]["address"]
+                const _tokenIn = fromTokenData ? fromTokenData.address : null
+                const _tokenOut = toTokenData ? toTokenData.address : null
+                if (!_tokenIn || !_tokenOut) {
+                    setAmountOut("0")
+                    return
+                }
                 let path = [_tokenIn, _tokenOut]
 
-                let amount_in = utils.parseEther(_amountIn.toString(), "ether")
+                let amount_in
+                try {
+                    amount_in = utils.parseUnits(_amountIn.toString(), fromTokenDecimals)
+                } catch (err) {
+                    setAmountOut("0")
+                    return
+                }
                 const prices = await Promise.all(
                     exchanges[currentNet].map(async (e) => {
                         if (e.name !== "Uniswap V3") {
                             const router = new ethers.Contract(e.address, e.router.abi, provider)
                             try {
                                 const amount = await router.getAmountsOut(amount_in, path)
-                                return Number(amount[1])
+                                return Number(utils.formatUnits(amount[1], toTokenDecimals))
                             } catch (err) {
                                 return 0
                             }
@@ -67,7 +76,7 @@ function Swap() {
                                     amount_in,
                                     0
                                 )
-                                return Number(amount)
+                                return Number(utils.formatUnits(amount, toTokenDecimals))
                             } catch (err) {
                                 return 0
                             }
@@ -77,8 +86,8 @@ function Swap() {
                 const maxPrice = Math.max.apply(null, prices)
                 const maxPriceIndex = prices.indexOf(maxPrice)
 
-                setAmountOut(Number(maxPrice) / 10 ** decimals)
-                getGasPrice(_tokenIn, _tokenOut, Number(_amountIn) * 10 ** decimals)
+                setAmountOut(maxPrice)
+                getGasPrice(_tokenIn, _tokenOut, amount_in.toString())
                 setBestExchange(exchangesMap[currentNet][maxPriceIndex])
             } else {
                 setAmountOut("0")
@@ -91,18 +100,27 @@ function Swap() {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             setAmountOut(Number(_amountOut))
             if (Number(_amountOut) !== 0) {
-                const decimals = tokens[currentNet][trade.toToken]["decimals"]
-                const _tokenIn = tokens[currentNet][trade.fromToken]["address"]
-                const _tokenOut = tokens[currentNet][trade.toToken]["address"]
+                const _tokenIn = fromTokenData ? fromTokenData.address : null
+                const _tokenOut = toTokenData ? toTokenData.address : null
+                if (!_tokenIn || !_tokenOut) {
+                    setAmountIn("0")
+                    return
+                }
                 let path = [_tokenIn, _tokenOut]
 
-                let amount_out = utils.parseEther(_amountOut.toString(), "ether")
+                let amount_out
+                try {
+                    amount_out = utils.parseUnits(_amountOut.toString(), toTokenDecimals)
+                } catch (err) {
+                    setAmountIn("0")
+                    return
+                }
                 const prices = await Promise.all(
                     exchanges[currentNet].map(async (e) => {
                         const router = new ethers.Contract(e.address, e.router.abi, provider)
                         try {
                             const amount = await router.getAmountsIn(amount_out, path)
-                            return Number(amount[0])
+                            return Number(utils.formatUnits(amount[0], fromTokenDecimals))
                         } catch (err) {
                             return 10 ** 60
                         }
@@ -111,8 +129,8 @@ function Swap() {
                 const minPrice = Math.min.apply(null, prices)
                 const minPriceIndex = prices.indexOf(minPrice)
 
-                setAmountIn(Number(minPrice) / 10 ** decimals)
-                getGasPrice(_tokenOut, _tokenIn, Number(_amountOut) * 10 ** decimals)
+                setAmountIn(minPrice)
+                getGasPrice(_tokenOut, _tokenIn, amount_out.toString())
                 setBestExchange(exchangesMap[currentNet][minPriceIndex])
             } else {
                 setAmountIn("0")
@@ -125,19 +143,23 @@ function Swap() {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             try {
                 setIsSwapping(true)
-                const _tokenIn = tokens[currentNet][trade.fromToken]["address"]
-                const _tokenOut = tokens[currentNet][trade.toToken]["address"]
+                const _tokenIn = fromTokenData ? fromTokenData.address : null
+                const _tokenOut = toTokenData ? toTokenData.address : null
+                if (!_tokenIn || !_tokenOut) {
+                    setIsSwapping(false)
+                    return
+                }
                 let path = [_tokenIn, _tokenOut]
 
                 const _amountOutMin = Number(amountOut) * 0.95
 
-                const amountOutMin = utils.parseEther(_amountOutMin.toString(), "ether")
+                const amountOutMin = utils.parseUnits(_amountOutMin.toString(), toTokenDecimals)
 
                 const signer = provider.getSigner()
 
                 const erc20Contract = new ethers.Contract(_tokenIn, ERC20.abi, signer);
 
-                const amount_in = utils.parseEther(amountIn.toString(), "ether")
+                const amount_in = utils.parseUnits(amountIn.toString(), fromTokenDecimals)
 
                 const approve_tx = await erc20Contract.approve(bestExchange["address"], amount_in)
 
@@ -219,13 +241,16 @@ function Swap() {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             const signer = provider.getSigner()
 
-            const decimals = tokens[currentNet][trade.fromToken]["decimals"]
-            const _tokenIn = tokens[currentNet][trade.fromToken]["address"]
+            const _tokenIn = fromTokenData ? fromTokenData.address : null
+            if (!_tokenIn) {
+                setTokenInBalance(null)
+                return
+            }
 
             const erc20Contract = new ethers.Contract(_tokenIn, ERC20.abi, signer);
             const balance = (await erc20Contract.balanceOf(data.account)).toString();
 
-            setTokenInBalance(Number(balance) / 10 ** decimals)
+            setTokenInBalance(Number(utils.formatUnits(balance, fromTokenDecimals)))
         }
     }
 
@@ -242,6 +267,9 @@ function Swap() {
     const currentTokens = tokens[currentNet] || []
     const fromTokenData = currentTokens[trade.fromToken]
     const toTokenData = currentTokens[trade.toToken]
+    // Change 2: use token decimals instead of assuming 18
+    const fromTokenDecimals = fromTokenData ? fromTokenData.decimals : 18
+    const toTokenDecimals = toTokenData ? toTokenData.decimals : 18
 
     useEffect(() => {
         if (window.ethereum != undefined && data.network !== "") {
