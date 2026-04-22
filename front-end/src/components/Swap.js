@@ -190,7 +190,7 @@ function Swap() {
                     } catch (err) {
                         logSwapToBackend("failed", null, err.message)
                         setIsSwapping(false)
-                        window.alert("An error has occured")
+                        window.alert(getSwapErrorMessage(err, "swap"))
                     }
                 } else {
                     router = new ethers.Contract(bestExchange["address"], ISwapRouter.abi, signer)
@@ -216,13 +216,13 @@ function Swap() {
                     } catch (err) {
                         logSwapToBackend("failed", null, err.message)
                         setIsSwapping(false)
-                        window.alert("An error has occured")
+                        window.alert(getSwapErrorMessage(err, "swap"))
                     }
                 }
             } catch (err) {
                 logSwapToBackend("failed", null, err.message)
                 setIsSwapping(false)
-                window.alert("An error has occured")
+                window.alert(getSwapErrorMessage(err, "approve"))
             }
         }
     }
@@ -305,6 +305,33 @@ function Swap() {
         } catch (err) {
             console.log("Could not save swap log")
         }
+    }
+
+    // Change 5: improve swap error messages
+    function getSwapErrorMessage(err, step) {
+        const message = err && err.message ? err.message.toLowerCase() : ""
+
+        if (err && err.code === 4001) {
+            return "Swap cancelled by user."
+        }
+
+        if (message.includes("user denied") || message.includes("user rejected") || message.includes("cancelled")) {
+            return "Swap cancelled by user."
+        }
+
+        if (message.includes("insufficient") || message.includes("balance") || message.includes("transfer amount exceeds")) {
+            return "Swap failed because your balance is too low."
+        }
+
+        if (step === "approve") {
+            return "Token approval failed. Check your balance and try again."
+        }
+
+        if (step === "swap") {
+            return "Swap failed. Check your balance, gas, and try again."
+        }
+
+        return "Something went wrong. Please try again."
     }
 
     useEffect(() => {
