@@ -16,6 +16,7 @@ function Swap() {
     const data = useSelector((state) => state.blockchain.value)
     const [amountIn, setAmountIn] = useState(0);
     const [amountOut, setAmountOut] = useState(0);
+    const [latestTransaction, setLatestTransaction] = useState(null);
     const [tokenInBalance, setTokenInBalance] = useState(null);
     const [gasPrice, setGasPrice] = useState(null);
     const [bestExchange, setBestExchange] = useState(null);
@@ -161,7 +162,7 @@ function Swap() {
 
                 const amount_in = utils.parseUnits(amountIn.toString(), fromTokenDecimals)
 
-                logSwapToBackend("attempted")
+                await logSwapToBackend("attempted")
 
                 const approve_tx = await erc20Contract.approve(bestExchange["address"], amount_in)
 
@@ -182,15 +183,13 @@ function Swap() {
                         );
                         await swap_tx.wait()
 
-                        logSwapToBackend("completed", swap_tx.hash)
+                        await logSwapToBackend("completed", swap_tx.hash)
 
                         setIsSwapping(false)
                         setAmountIn(null)
                         setAmountIn(null)
                     } catch (err) {
-                        logSwapToBackend("failed", null, err.message)
-                        setIsSwapping(false)
-                        window.alert(getSwapErrorMessage(err, "swap"))
+                        await handleSwapFailure(err, "swap")
                     }
                 } else {
                     router = new ethers.Contract(bestExchange["address"], ISwapRouter.abi, signer)
@@ -208,21 +207,17 @@ function Swap() {
                         const swap_tx = await router.exactInputSingle(params);
                         await swap_tx.wait()
 
-                        logSwapToBackend("completed", swap_tx.hash)
+                        await logSwapToBackend("completed", swap_tx.hash)
 
                         setIsSwapping(false)
                         setAmountIn(null)
                         setAmountIn(null)
                     } catch (err) {
-                        logSwapToBackend("failed", null, err.message)
-                        setIsSwapping(false)
-                        window.alert(getSwapErrorMessage(err, "swap"))
+                        await handleSwapFailure(err, "swap")
                     }
                 }
             } catch (err) {
-                logSwapToBackend("failed", null, err.message)
-                setIsSwapping(false)
-                window.alert(getSwapErrorMessage(err, "approve"))
+                await handleSwapFailure(err, "approve")
             }
         }
     }
@@ -283,7 +278,7 @@ function Swap() {
     // Change 4: log swap updates to backend
     async function logSwapToBackend(status, txHash = null, errorMessage = null) {
         try {
-            await fetch("http://localhost:5001/api/transaction-log", {
+            const response = await fetch("http://localhost:5001/api/transaction-log", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -302,8 +297,28 @@ function Swap() {
                     errorMessage,
                 }),
             })
+
+            if (response.ok) {
+                // Change 7: refresh latest transaction after swap log
+                await getLatestTransaction()
+            }
         } catch (err) {
             console.log("Could not save swap log")
+        }
+    }
+
+    // Change 6: show latest transaction from backend
+    async function getLatestTransaction() {
+        try {
+            const response = await fetch("http://localhost:5001/api/transaction-log/latest")
+            if (!response.ok) {
+                return
+            }
+
+            const data = await response.json()
+            setLatestTransaction(data.entry || null)
+        } catch (err) {
+            console.log("Could not load latest transaction")
         }
     }
 
@@ -334,11 +349,23 @@ function Swap() {
         return "Something went wrong. Please try again."
     }
 
+    // Change 7: log cancelled swap to backend
+    async function handleSwapFailure(err, step) {
+        const errorMessage = getSwapErrorMessage(err, step)
+        await logSwapToBackend("failed", null, errorMessage)
+        setIsSwapping(false)
+        window.alert(errorMessage)
+    }
+
     useEffect(() => {
         if (window.ethereum != undefined && data.network !== "") {
             getErc20Balance()
         }
     }, [trade.fromToken, data.network])
+
+    useEffect(() => {
+        getLatestTransaction()
+    }, [])
 
     return (
         data.network !== "" ? (
@@ -401,6 +428,44 @@ function Swap() {
                                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={swap}>
                                     {isSwapping ? <CircularProgress color="inherit" size={18} /> : "Swap"}
                                 </button>
+                                <div className="swapbox" style={{ marginBottom: "0" }}>
+                                    <h5>Latest Transaction</h5>
+                                    {latestTransaction ? (
+                                        <div style={{ textAlign: "left", wordBreak: "break-word" }}>
+                                            <div className="gas_estimate_label">
+                                                Status: <span>{latestTransaction.status}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Network: <span>{latestTransaction.network}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Pair: <span>{latestTransaction.fromToken} to {latestTransaction.toToken}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Amount In: <span>{latestTransaction.amountIn}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Estimated Out: <span>{latestTransaction.amountOutEstimated}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Exchange: <span>{latestTransaction.exchange}</span>
+                                            </div>
+                                            <div className="gas_estimate_label">
+                                                Wallet: <span>{latestTransaction.walletAddress}</span>
+                                            </div>
+                                            {latestTransaction.txHash ? (
+                                                <div className="gas_estimate_label">
+                                                    Tx Hash: <span>{latestTransaction.txHash}</span>
+                                                </div>
+                                            ) : null}
+                                            <div className="gas_estimate_label">
+                                                Timestamp: <span>{latestTransaction.timestamp}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div>No transaction logged yet.</div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
