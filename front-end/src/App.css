@@ -35,6 +35,43 @@ body {
   color: #61dafb;
 }
 
+/* Change 10: improve page layout and card alignment */
+.app-shell {
+  min-height: 100vh;
+  background: #f4f5f7;
+}
+
+.app-title-section {
+  text-align: center;
+  margin: 0 auto;
+  padding: 6px 20px 0;
+}
+
+.app-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #1f1f1f;
+  font-size: 2rem;
+}
+
+.app-subtitle {
+  max-width: 720px;
+  margin: 0 auto;
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 32em) {
+  .app-title-section {
+    padding: 4px 16px 0;
+  }
+
+  .app-title {
+    font-size: 1.75rem;
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

@@ -94,11 +94,11 @@ function Exchanges(props) {
 
     return (
         <>
-            <Table >
+            <Table className="exchange-table">
                 <thead>
                     <tr>
                         <th>Exchange</th>
-                        <th>Price</th>
+                        <th>Estimated Output</th>
                     </tr>
                 </thead>
                 <tbody>

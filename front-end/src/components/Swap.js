@@ -17,6 +17,7 @@ function Swap() {
     const [amountIn, setAmountIn] = useState(0);
     const [amountOut, setAmountOut] = useState(0);
     const [latestTransaction, setLatestTransaction] = useState(null);
+    const [showLatestTransaction, setShowLatestTransaction] = useState(true);
     const [tokenInBalance, setTokenInBalance] = useState(null);
     const [gasPrice, setGasPrice] = useState(null);
     const [bestExchange, setBestExchange] = useState(null);
@@ -299,7 +300,8 @@ function Swap() {
             })
 
             if (response.ok) {
-                // Change 7: refresh latest transaction after swap log
+                // Change 9: show and refresh the latest transaction after each new log
+                setShowLatestTransaction(true)
                 await getLatestTransaction()
             }
         } catch (err) {
@@ -428,44 +430,56 @@ function Swap() {
                                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={swap}>
                                     {isSwapping ? <CircularProgress color="inherit" size={18} /> : "Swap"}
                                 </button>
-                                <div className="swapbox" style={{ marginBottom: "0" }}>
-                                    <h5>Latest Transaction</h5>
-                                    {latestTransaction ? (
-                                        <div style={{ textAlign: "left", wordBreak: "break-word" }}>
-                                            <div className="gas_estimate_label">
-                                                Status: <span>{latestTransaction.status}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Network: <span>{latestTransaction.network}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Pair: <span>{latestTransaction.fromToken} to {latestTransaction.toToken}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Amount In: <span>{latestTransaction.amountIn}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Estimated Out: <span>{latestTransaction.amountOutEstimated}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Exchange: <span>{latestTransaction.exchange}</span>
-                                            </div>
-                                            <div className="gas_estimate_label">
-                                                Wallet: <span>{latestTransaction.walletAddress}</span>
-                                            </div>
-                                            {latestTransaction.txHash ? (
-                                                <div className="gas_estimate_label">
-                                                    Tx Hash: <span>{latestTransaction.txHash}</span>
-                                                </div>
-                                            ) : null}
-                                            <div className="gas_estimate_label">
-                                                Timestamp: <span>{latestTransaction.timestamp}</span>
+                                {showLatestTransaction ? (
+                                    <div className="swapbox" style={{ marginBottom: "0" }}>
+                                        <div className="latest-transaction-header">
+                                            <h5>Latest Transaction</h5>
+                                            <div className="latest-transaction-actions">
+                                                <button className="btn btn-sm btn-secondary" onClick={getLatestTransaction}>
+                                                    Refresh
+                                                </button>
+                                                <button className="btn btn-sm btn-outline-secondary" onClick={() => setShowLatestTransaction(false)}>
+                                                    X
+                                                </button>
                                             </div>
                                         </div>
-                                    ) : (
-                                        <div>No transaction logged yet.</div>
-                                    )}
-                                </div>
+                                        {latestTransaction ? (
+                                            <div style={{ textAlign: "left", wordBreak: "break-word" }}>
+                                                <div className="gas_estimate_label">
+                                                    Status: <span>{latestTransaction.status}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Network: <span>{latestTransaction.network}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Pair: <span>{latestTransaction.fromToken} to {latestTransaction.toToken}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Amount In: <span>{latestTransaction.amountIn}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Estimated Out: <span>{latestTransaction.amountOutEstimated}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Exchange: <span>{latestTransaction.exchange}</span>
+                                                </div>
+                                                <div className="gas_estimate_label">
+                                                    Wallet: <span>{latestTransaction.walletAddress}</span>
+                                                </div>
+                                                {latestTransaction.txHash ? (
+                                                    <div className="gas_estimate_label">
+                                                        Tx Hash: <span>{latestTransaction.txHash}</span>
+                                                    </div>
+                                                ) : null}
+                                                <div className="gas_estimate_label">
+                                                    Timestamp: <span>{latestTransaction.timestamp}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>No transaction logged yet.</div>
+                                        )}
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -489,8 +503,8 @@ function Swap() {
                             </Button>
                         </Modal.Footer>
                     </Modal>
-                    <div className="header-box" style={{ textAlign: "center" }}>
-                        <h3 >Exchanges</h3>
+                    <div className="header-box exchange-card" style={{ textAlign: "center" }}>
+                        <h3 className="exchange-card-title">Exchange Comparison</h3>
                         <Exchanges token0={trade.fromToken} token1={trade.toToken} />
                     </div>
                 </div>

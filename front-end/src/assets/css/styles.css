@@ -1,37 +1,42 @@
-/* header */
+/* Change 10: improve page layout and card alignment */
 
 .header {
     width: 100%;
     position: relative;
-    padding-bottom: 2rem;
+    padding: 18px 0 36px;
 }
 
 .header-container {
-    width: 80%;
-    min-height: 65vh;
+    width: min(1120px, calc(100% - 32px));
     margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 28px;
+    align-items: start;
 }
 
 .header-box {
-    width: 50%;
-    height: 100%;
+    width: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+#window,
+.exchange-card {
+    width: 100%;
+    background-color: rgb(81, 76, 76);
+    color: #fff;
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid #625d5d;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.14);
 }
 
 #window {
-    width: 500px;
-    margin-top: 50px;
-    background-color: rgb(81, 76, 76);
-    color: #fff;
-    padding: 15px;
-    border-radius: 20px;
-    box-shadow: 0 0 5px black;
+    margin-top: 0;
 }
 
 .swapbox_select {
@@ -41,7 +46,7 @@
 
 .swapbox {
     overflow: auto;
-    margin: 20px 0;
+    margin: 16px 0;
     padding: 20px;
     background-color: #2f2f2f;
     border-radius: 20px;
@@ -79,38 +84,94 @@
     padding-bottom: 10px;
 }
 
+.exchange-card {
+    margin-top: 0;
+}
+
+.exchange-card-title {
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+.exchange-table {
+    width: 100%;
+    color: #fff;
+    background: transparent;
+}
+
+.exchange-table th,
+.exchange-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.exchange-table th {
+    color: #e8e8e8;
+    font-weight: 600;
+}
+
+.latest-transaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.latest-transaction-header h5 {
+    margin: 0;
+}
+
+.latest-transaction-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.latest-transaction-actions .btn {
+    min-width: 72px;
+}
+
 .modal-body {
     overflow: scroll;
 }
 
 @media (max-width: 64em) {
     .header-container {
-        flex-direction: column;
-        width: 100%;
+        grid-template-columns: 1fr;
+        width: min(720px, calc(100% - 32px));
     }
 
     #window {
-        width: 400px;
-        margin-bottom: 35px;
+        margin-bottom: 0;
     }
 }
 
 @media (max-width: 32em) {
     .header-container {
-        flex-direction: column;
-        width: 100%;
+        width: calc(100% - 20px);
+        gap: 18px;
     }
     
-     .header-box {
+    .header-box {
         width: 100%;
     }
 
-    #window {
-        width: 350px;
-        margin-bottom: 35px;
+    #window,
+    .exchange-card {
+        padding: 18px;
     }
 
     .token_img {
         height: 25px;
+    }
+
+    .latest-transaction-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .latest-transaction-actions {
+        width: 100%;
     }
 }

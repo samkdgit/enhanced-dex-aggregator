@@ -1,112 +1,171 @@
-<div id="top"></div>
+# Enhanced Dex Aggregator
 
-<!-- ABOUT THE PROJECT -->
-## Dex-aggregator
+Enhanced Dex Aggregator is a small hybrid DApp for comparing token swap quotes across several decentralised exchanges. It has a React frontend, a small Express backend, MetaMask wallet connection, a swap flow, and a latest transaction log.
 
-With the ever growing DEFI world and the appearance of multiple decentralized exchanges on the different blockchains, the WEB3 ecosystem needs a way to compare the pros & cons of swapping on each DEX. 
+## Features
 
-This excatly what Paraswap & 1inch protocol are trying to do, they aggregate the prices of tokens from multiple exchanges in each Blockchain (for example: uniswap, sushiswap, shibaswap in the Ethereum Mainnet), then they compare those prices and the swapping fee and offer to their user the best exchange rate possible.
+- Connect a wallet with MetaMask
+- Compare swap quotes across supported DEXs
+- Show estimated output values for a token pair
+- Try a token swap from the frontend
+- Log swap attempts and failed or cancelled swaps to the backend
+- Show the latest logged transaction in the UI
+- Support multiple EVM networks from the project config
 
-In this Dapp, i built a simplified version of Paraswap it works on 4 blockchains: Ethereum, Polygon, Binance Smart Chain and the kovan testnet.For the moment it supports some well known tokens (ETH, Matic, Dai, USDC,...).
+## Tech Stack
 
-<p align="center">
-  <img alt="Dark" src="https://user-images.githubusercontent.com/83681204/182487367-977ccc2f-2ba3-414c-9a5f-1b4b855af4a6.png" width="100%">
-</p>
+### Frontend
 
-### Built With
+- React
+- ethers.js
+- Redux Toolkit
+- React Bootstrap
+- Material UI
 
-* [Solidity](https://docs.soliditylang.org/)
-* [Brownie](https://eth-brownie.readthedocs.io)
-* [React.js](https://reactjs.org/)
-* [ethers.js](https://docs.ethers.io/v5/)
-* [web3modal](https://github.com/Web3Modal/web3modal)
-* [material ui](https://mui.com/getting-started/installation/)
+### Backend
 
+- Node.js
+- Express
+- Simple JSON file storage for transaction logs
 
-<!-- GETTING STARTED -->
-## Getting Started
+### Blockchain and Tooling
 
-### Prerequisites
+- MetaMask
+- Solidity interface files
+- Brownie scripts
 
-Please install or have installed the following:
-* [nodejs and npm](https://nodejs.org/en/download/) 
-* [python](https://www.python.org/downloads/)
-* [MetaMask](https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn) Chrome extension installed in your browser
+## Project Structure
 
-### Installation
+```text
+Enhanced-Dex-aggregator/
+├── backend/
+│   ├── data/
+│   ├── package.json
+│   └── server.js
+├── build/
+├── front-end/
+│   ├── public/
+│   ├── src/
+│   └── package.json
+├── interfaces/
+├── scripts/
+├── brownie-config.yaml
+└── README.md
+```
 
-1. Installing Brownie: Brownie is a python framework for smart contracts development,testing and deployments. It's quit like [HardHat](https://hardhat.org) but it uses python for writing test and deployements scripts instead of javascript.
-   Here is a simple way to install brownie.
-   ```
-    pip install --user pipx
-    pipx ensurepath
-    # restart your terminal
-    pipx install eth-brownie
-   ```
-   Or if you can't get pipx to work, via pip (it's recommended to use pipx)
-    ```sh
-    pip install eth-brownie
-    ```
-   Install [ganache-cli](https://www.npmjs.com/package/ganache-cli): 
-   ```sh
-    npm install -g ganache-cli
-    ```
-2. Clone the repo:
-   ```sh
-   git clone https://github.com/kaymen99/Dex-aggregator.git
-   cd Dex-aggregator
-   ```
-   
-3. Set your environment variables
-   To be able to deploy to real testnets you need to add your PRIVATE_KEY (You can find your PRIVATE_KEY from your ethereum wallet like metamask) and the infura project Id (just create an infura account it's free) to the .env file:
-   ```
-   PRIVATE_KEY=<PRIVATE_KEY>
-   WEB3_INFURA_PROJECT_ID=<< YOUR INFURA PROJECT ID >>
-   ```
-   You can choose to use ethereum testnets like rinkeby, Kovan or any other evm compatible testnet.
-   You'll also need some eth in the testnet. You can get it into your wallet by using a public faucet. 
+## Installation
 
+1. Clone the repo:
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+```bash
+git clone https://github.com/samkdgit/Enhanced-Dex-aggregator.git
+cd Enhanced-Dex-aggregator
+```
 
+2. Install frontend dependencies:
 
-<!-- USAGE EXAMPLES -->
+```bash
+cd front-end
+yarn install
+cd ..
+```
+
+3. Install backend dependencies:
+
+```bash
+cd backend
+npm install
+cd ..
+```
+
+## Run the App
+
+Start the backend first:
+
+```bash
+cd backend
+npm start
+```
+
+Backend runs on:
+
+```text
+http://localhost:5001
+```
+
+Start the frontend in a second terminal:
+
+```bash
+cd front-end
+yarn start
+```
+
+Frontend runs on:
+
+```text
+http://localhost:3000
+```
+
 ## How to Use
-   After going throught the installation part you can start the app by running:
-   ```sh
-   cd front-end
-   yarn
-   yarn start
-   ```
-   The front-end is built using the following libraries:
-      <ul>
-        <li><b>Ethers.js:</b> used as interface between the UI and the deployed smart contract</li>
-        <li><b>Web3modal:</b> for conecting to Metamask</li>
-        <li><b>@reduxjs/toolkit & redux-persist:</b> for managing the app states (account, balance, blockchain) </li>
-        <li><b>Material UI:</b> used for react components and styles </li>    
-      </ul>
-   There are 2 main components:
-      <ul>
-        <li><b>Swap component:</b> It finds the best price possible for the user tokens from the supported exchanges and allow user to approve & excute the swap transaction </li>
-        <li><b>Exchanges component:</b> For getting the token prices on the different exchanges</li>  
-      </ul>   
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+1. Start the backend.
+2. Start the frontend.
+3. Open `http://localhost:3000` in your browser.
+4. Connect your wallet with MetaMask.
+5. Make sure you are on a supported network.
+6. Choose the token you want to swap from and the token you want to swap to.
+7. Enter an amount.
+8. Check the quote comparison table.
+9. Click `Swap` to try the swap flow.
+10. Check the Latest Transaction panel to see the newest logged entry.
 
+## API Routes
 
-<!-- Contact -->
-## Contact
+### GET /api/health
 
-If you have any question or problem running this project just contact me: aymenMir1001@gmail.com
+Returns a simple server status and timestamp.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+### GET /api/project-info
 
+Returns simple project information such as the project name and supported networks.
 
-<!-- LICENSE -->
+### POST /api/transaction-log
+
+Saves a transaction log entry sent from the frontend.
+
+Example JSON body:
+
+```json
+{
+  "network": "Polygon Mainnet",
+  "walletAddress": "0x123...",
+  "fromToken": "USDC",
+  "toToken": "DAI",
+  "amountIn": 10,
+  "amountOutEstimated": 9.98,
+  "exchange": "SushiSwap",
+  "txHash": null,
+  "status": "failed",
+  "errorMessage": "Swap cancelled by user.",
+  "timestamp": "2026-04-22T12:00:00.000Z"
+}
+```
+
+### GET /api/transaction-log/latest
+
+Returns the latest saved transaction log entry.
+
+## Limitations
+
+- You need a wallet with the right network and enough funds for a real on-chain swap.
+- Cancelled and failed swap attempts can still be logged and shown in the UI.
+- The backend uses a simple local JSON file, not a database.
+- Supported networks and tokens come from the current project config.
+
+## Acknowledgement
+
+This project is based on the original open-source repo: [kaymen99/Dex-aggregator](https://github.com/kaymen99/Dex-aggregator)
+
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
+MIT License. See `LICENSE` for more information.
