@@ -238,6 +238,10 @@ function Swap() {
         }
     }
     const currentNet = data.network !== "" ? data.network : "Ethereum Mainnet"
+    // Change 1: use current network for token labels
+    const currentTokens = tokens[currentNet] || []
+    const fromTokenData = currentTokens[trade.fromToken]
+    const toTokenData = currentTokens[trade.toToken]
 
     useEffect(() => {
         if (window.ethereum != undefined && data.network !== "") {
@@ -256,13 +260,13 @@ function Swap() {
                                 <div className="swapbox">
                                     <div className="swapbox_select token_select"
                                         onClick={() => { handleShow("from") }}>
-                                        {trade.fromToken !== "" ? (
+                                        {fromTokenData ? (
                                             <>
                                                 <img className="token_img"
-                                                    src={tokens["Ethereum Mainnet"][trade.fromToken].image}
+                                                    src={fromTokenData.image}
                                                 />
                                                 <span className='token_text'>
-                                                    {tokens["Ethereum Mainnet"][trade.fromToken].name}
+                                                    {fromTokenData.name}
                                                 </span>
                                             </>
                                         ) : "Select A Token"}
@@ -278,13 +282,13 @@ function Swap() {
                                 <div className="swapbox">
                                     <div className="swapbox_select token_select"
                                         onClick={() => { handleShow("to") }}>
-                                        {trade.toToken !== "" ? (
+                                        {toTokenData ? (
                                             <>
                                                 <img className="token_img"
-                                                    src={tokens["Ethereum Mainnet"][trade.toToken].image}
+                                                    src={toTokenData.image}
                                                 />
                                                 <span className='token_text'>
-                                                    {tokens["Ethereum Mainnet"][trade.toToken].name}
+                                                    {toTokenData.name}
                                                 </span>
                                             </>
                                         ) : "Select A Token"}
@@ -301,7 +305,7 @@ function Swap() {
                                     Estimated Gas: <span>{gasPrice}</span>
                                 </div>
                                 <div className="gas_estimate_label">
-                                    Your {tokens["Ethereum Mainnet"][trade.fromToken].name} Balance: <span>{tokenInBalance}</span>
+                                    Your {fromTokenData ? fromTokenData.name : "Token"} Balance: <span>{tokenInBalance}</span>
                                 </div>
                                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={swap}>
                                     {isSwapping ? <CircularProgress color="inherit" size={18} /> : "Swap"}
@@ -314,7 +318,7 @@ function Swap() {
                             <Modal.Title>SELECT A TOKEN</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            {tokens["Ethereum Mainnet"].map((token, index) => {
+                            {currentTokens.map((token, index) => {
                                 return (
                                     <div className="token_row" key={index} onClick={() => { selectToken(index) }} >
                                         <img className="token_img" src={token.image} />
