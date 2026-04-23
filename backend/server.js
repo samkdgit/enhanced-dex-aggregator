@@ -2,10 +2,17 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
+// note:
+
+// I added this small backend file to support simple API routes and transaction logging. It a simple way to log transactions in a local JSON file and retrieve the latest transaction for display in the frontend.
+
+// My main changes here are the local JSON log storage and the latest transaction route.
+
 const app = express();
 const port = process.env.PORT || 5001;
 const logDir = path.join(__dirname, "data");
-// Change 3: store transaction logs in a local json file
+
+// store transaction logs in a local json file
 const logFile = path.join(logDir, "transaction-log.json");
 const supportedNetworks = [
     "Ethereum Mainnet",

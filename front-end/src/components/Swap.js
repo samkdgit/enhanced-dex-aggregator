@@ -12,6 +12,9 @@ import ISwapRouter from "../artifacts/interfaces/ISwapRouter.json";
 import ERC20 from "../artifacts/interfaces/IERC20.json";
 import Exchanges from './Exchanges';
 
+// Updated file o improve swap handling in the UI and connect it to the backend log. 
+// My main changes here are in the getPriceOut, getPriceIn, swap, logSwapToBackend, and getLatestTransaction functions, as well as the new error handling and latest transaction display in the UI.
+
 function Swap() {
     const data = useSelector((state) => state.blockchain.value)
     const [amountIn, setAmountIn] = useState(0);
@@ -268,15 +271,19 @@ function Swap() {
         }
     }
     const currentNet = data.network !== "" ? data.network : "Ethereum Mainnet"
+
     // Change 1: use current network for token labels
     const currentTokens = tokens[currentNet] || []
     const fromTokenData = currentTokens[trade.fromToken]
     const toTokenData = currentTokens[trade.toToken]
-    // Change 2: use token decimals instead of assuming 18
+
+    // Change 2: use token decimals instead of assuming 18 
+
     const fromTokenDecimals = fromTokenData ? fromTokenData.decimals : 18
     const toTokenDecimals = toTokenData ? toTokenData.decimals : 18
 
-    // Change 4: log swap updates to backend
+    // Change 4: log swap updates to backend 
+
     async function logSwapToBackend(status, txHash = null, errorMessage = null) {
         try {
             const response = await fetch("http://localhost:5001/api/transaction-log", {
@@ -309,7 +316,7 @@ function Swap() {
         }
     }
 
-    // Change 6: show latest transaction from backend
+    // Change 6: to show latest transaction from backend log
     async function getLatestTransaction() {
         try {
             const response = await fetch("http://localhost:5001/api/transaction-log/latest")
@@ -324,7 +331,7 @@ function Swap() {
         }
     }
 
-    // Change 5: improve swap error messages
+    // Change 5: to improve swap error messages
     function getSwapErrorMessage(err, step) {
         const message = err && err.message ? err.message.toLowerCase() : ""
 
@@ -351,7 +358,8 @@ function Swap() {
         return "Something went wrong. Please try again."
     }
 
-    // Change 7: log cancelled swap to backend
+    // Change 7: log cancelled swap to backend and show alert, instead of just silently failing on user cancellation. 
+
     async function handleSwapFailure(err, step) {
         const errorMessage = getSwapErrorMessage(err, step)
         await logSwapToBackend("failed", null, errorMessage)

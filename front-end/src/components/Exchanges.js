@@ -4,13 +4,19 @@ import { Table } from "@mui/material"
 import { useSelector } from "react-redux";
 import { tokens, exchanges } from "../utils/helpers";
 
+// Note:
+// I updated this file so exchange quotes use the correct token decimals on each network.
+// The changes here are safer token checks and a clearer comparison table.
+
+
 function Exchanges(props) {
 
     const data = useSelector((state) => state.blockchain.value)
     const [amounts, setAmounts] = useState([])
 
     const currentNet = data.network !== "" ? data.network : "Ethereum Mainnet"
-    // Change 2: use token decimals instead of assuming 18
+
+    // Change 2: To use token decimals instead of assuming 18
     const currentTokens = tokens[currentNet] || []
     const fromTokenData = currentTokens[props.token0]
     const toTokenData = currentTokens[props.token1]
