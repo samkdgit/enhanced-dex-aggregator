@@ -2,6 +2,9 @@
 
 Enhanced Dex Aggregator is a small hybrid DApp for comparing token swap quotes across several decentralised exchanges. It has a React frontend, a small Express backend, MetaMask wallet connection, a swap flow, and a latest transaction log.
 
+<img width="1708" height="979" alt="image" src="https://github.com/user-attachments/assets/2670c902-d580-48c6-8f31-e7c9bda6abea" />
+
+
 ## Features
 
 - Connect a wallet with MetaMask
